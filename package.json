@@ -1,0 +1,46 @@
+{
+  "name": "wts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "cross-env DEV_PORT=5173 vite --host",
+    "dev:electron": "wait-on tcp:5173 && cross-env DEV_PORT=5173 electron .",
+    "start": "concurrently -k \"npm run dev\" \"npm run dev:electron\"",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "package": "npm run build && electron-builder"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "js-cookie": "^3.0.8",
+    "jsencrypt": "^3.5.4",
+    "mysql2": "^3.22.5",
+    "vue": "^3.5.16"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.6.2",
+    "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0",
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3",
+    "vite": "^4.5.14",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.wts.desktop",
+    "productName": "WTS",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
