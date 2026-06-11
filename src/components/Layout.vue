@@ -6,17 +6,18 @@ const emit = defineEmits(['logout', 'navigate'])
 const userStore = useUserStore()
 
 const activeMenu = ref('dashboard')
-
-const menuItems = [
-  { id: 'dashboard', label: '工作台', icon: 'work' },
-  { id: 'tasks', label: '任务管理', icon: 'list' }
-]
-
-const showUserMenu = ref(false)
+const expandedSections = ref({
+  skills: true,
+  taskList: true
+})
 
 const handleNavClick = (id) => {
   activeMenu.value = id
   emit('navigate', id)
+}
+
+const toggleSection = (section) => {
+  expandedSections.value[section] = !expandedSections.value[section]
 }
 
 const handleLogout = () => {
@@ -27,6 +28,8 @@ const handleLogout = () => {
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value
 }
+
+const showUserMenu = ref(false)
 </script>
 
 <template>
@@ -34,57 +37,81 @@ const toggleUserMenu = () => {
     <!-- 左侧边栏 -->
     <aside class="sidebar">
       <div class="sidebar-content">
+        <!-- 默认菜单 - 工作台、任务管理 -->
+        <div class="sidebar-section default-menu">
+          <button 
+            class="task-item main-item"
+            :class="{ active: activeMenu === 'dashboard' }"
+            @click="handleNavClick('dashboard')"
+          >
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+            </svg>
+            <span>工作台</span>
+          </button>
+          <button 
+            class="task-item main-item"
+            :class="{ active: activeMenu === 'tasks' }"
+            @click="handleNavClick('tasks')"
+          >
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"/>
+              <line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/>
+              <line x1="3" y1="12" x2="3.01" y2="12"/>
+              <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+            <span>任务管理</span>
+          </button>
+        </div>
+
         <!-- 技能类别 -->
         <div class="sidebar-section">
-          <div class="section-header">
+          <button class="section-header" @click="toggleSection('skills')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
             </svg>
             <span>技能</span>
-          </div>
-          <div class="section-content task-list">
+            <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ expanded: expandedSections.skills }">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+          <div v-show="expandedSections.skills" class="section-content task-list">
             <button
-              class="task-item"
+              class="task-item sub-item"
               :class="{ active: activeMenu === 'outline' }"
               @click="handleNavClick('outline')"
             >
               <div class="task-status active"></div>
-              <span>最新试验大纲生成</span>
+              <span>试验大纲生成</span>
             </button>
           </div>
         </div>
 
         <!-- 任务列表 -->
         <div class="sidebar-section">
-          <div class="section-header">
+          <button class="section-header" @click="toggleSection('taskList')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
               <polyline points="12 6 12 12 16 14"/>
             </svg>
             <span>任务列表</span>
-            <button class="section-menu">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="19" x2="12" y2="5"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-            </button>
-          </div>
-          <div class="section-content task-list">
+            <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ expanded: expandedSections.taskList }">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+          <div v-show="expandedSections.taskList" class="section-content task-list">
             <button 
-              class="task-item"
-              :class="{ active: activeMenu === 'dashboard' }"
-              @click="handleNavClick('dashboard')"
+              class="task-item sub-item"
+              :class="{ active: activeMenu === 'history' }"
+              @click="handleNavClick('history')"
             >
               <div class="task-status"></div>
-              <span>工作台</span>
-            </button>
-            <button 
-              class="task-item"
-              :class="{ active: activeMenu === 'tasks' }"
-              @click="handleNavClick('tasks')"
-            >
-              <div class="task-status active"></div>
-              <span>任务管理</span>
+              <span>历史处理任务</span>
             </button>
           </div>
         </div>

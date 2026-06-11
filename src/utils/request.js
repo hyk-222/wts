@@ -1,20 +1,26 @@
 import axios from 'axios'
-import { getToken } from './auth'
+import { getToken, getWdsToken } from './auth'
 
 const service = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: import.meta.env.VITE_APP_BASE_API || 'http://localhost:8080',
   timeout: 15000,
   withCredentials: true
 })
 
 service.interceptors.request.use(
   config => {
-    const token = getToken()
-    if (token && token !== 'undefined') {
+    // 优先使用 wdsToken，其次使用 Admin-Token
+    const wdsToken = getWdsToken()
+    const adminToken = getToken()
+    const token = wdsToken || adminToken
+    
+    if (token && token !== 'undefined' && token !== undefined) {
       config.headers['Authorization'] = 'Bearer ' + token
+      config.headers['token'] = token
     }
     if (config.headers.isToken === false) {
       delete config.headers['Authorization']
+      delete config.headers['token']
     }
     return config
   },

@@ -9,17 +9,13 @@ const userStore = useUserStore()
 const loginForm = ref({
   username: '',
   password: '',
-  code: '',
-  rememberMe: false,
-  uuid: ''
+  rememberMe: false
 })
 
-const codeUrl = ref('')
 const loading = ref(false)
 const errorMsg = ref('')
 const isUsernameFocused = ref(false)
 const isPasswordFocused = ref(false)
-const isCodeFocused = ref(false)
 
 // 从Cookie读取记住的密码
 const getCookieLogin = () => {
@@ -38,28 +34,14 @@ const getCookieLogin = () => {
   }
 }
 
-const getCode = async () => {
-  try {
-    const res = await userStore.getCaptcha()
-    codeUrl.value = 'data:image/gif;base64,' + res.img
-    loginForm.value.uuid = res.uuid
-  } catch (e) {
-    console.error('获取验证码失败:', e)
-    codeUrl.value = ''
-  }
-}
-
 const handleLogin = async () => {
+  if (loading.value) return
   if (!loginForm.value.username) {
     errorMsg.value = '请输入用户名'
     return
   }
   if (!loginForm.value.password) {
     errorMsg.value = '请输入密码'
-    return
-  }
-  if (!loginForm.value.code) {
-    errorMsg.value = '请输入验证码'
     return
   }
 
@@ -86,27 +68,20 @@ const handleLogin = async () => {
     }
 
     await userStore.login({
-      ...loginForm.value,
+      username: loginForm.value.username,
       password: encryptedPassword
     })
     await userStore.getUserInfo()
     emit('login-success', userStore.state)
   } catch (e) {
     errorMsg.value = e.message || '登录失败，请重试'
-    getCode()
   } finally {
     loading.value = false
   }
 }
 
-const handleKeyup = (e) => {
-  if (e.key === 'Enter') {
-    handleLogin()
-  }
-}
 
 onMounted(() => {
-  getCode()
   getCookieLogin()
 })
 </script>
@@ -124,10 +99,6 @@ onMounted(() => {
       <!-- 品牌区 -->
       <div class="brand-section">
         <div class="brand-content">
-          <div class="welcome-text">
-            <h2>欢迎回来</h2>
-            <p>登录以继续使用 WTS 协同工作</p>
-          </div>
           <div class="brand-logo">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
@@ -136,6 +107,10 @@ onMounted(() => {
           <h1 class="brand-title">
             WTS<span class="gradient-text">协同工作</span>
           </h1>
+          <div class="welcome-text">
+            <h2>欢迎回来</h2>
+            <p>登录以继续使用 WTS 协同工作</p>
+          </div>
         </div>
       </div>
 
@@ -184,32 +159,8 @@ onMounted(() => {
                   placeholder="请输入密码"
                   @focus="isPasswordFocused = true"
                   @blur="isPasswordFocused = false"
-                  @keyup="handleKeyup"
                   class="form-input"
-                />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">验证码</label>
-              <div class="input-wrapper captcha-wrapper" :class="{ focused: isCodeFocused }">
-                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-                  <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-                <input
-                  v-model="loginForm.code"
-                  type="text"
-                  placeholder="请输入验证码"
-                  @focus="isCodeFocused = true"
-                  @blur="isCodeFocused = false"
-                  @keyup="handleKeyup"
-                  class="form-input captcha-input"
-                />
-                <div class="captcha-img" @click="getCode">
-                  <img v-if="codeUrl" :src="codeUrl" alt="验证码" />
-                  <span v-else>点击获取</span>
-                </div>
+                  />
               </div>
             </div>
 
@@ -333,7 +284,7 @@ onMounted(() => {
 }
 
 .welcome-text {
-  margin-bottom: 32px;
+  margin-top: 32px;
 }
 
 .welcome-text h2 {
@@ -368,7 +319,7 @@ onMounted(() => {
 }
 
 .brand-title {
-  font-size: 36px;
+  font-size: 56px;
   font-weight: 700;
   color: #0f172a;
   line-height: 1.2;
