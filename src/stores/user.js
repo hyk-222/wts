@@ -1,8 +1,8 @@
 import { ref, reactive } from 'vue'
 import { login as apiLogin, getInfo, logout as apiLogout, getCodeImg } from '@/api/login'
-import { getToken, setToken, removeToken, getWdsToken, setWdsToken } from '@/utils/auth'
+import { getToken, setToken, removeToken } from '@/utils/auth'
 
-const token = ref(getToken() || getWdsToken())
+const token = ref(getToken())
 const userInfo = reactive({
   name: '',
   nickName: '',
@@ -12,7 +12,7 @@ const userInfo = reactive({
 })
 
 const state = reactive({
-  token: getToken() || getWdsToken(),
+  token: getToken(),
   name: '',
   nickName: '',
   avatar: '',
@@ -22,14 +22,10 @@ const state = reactive({
 
 export function useUserStore() {
   const login = async (userInfoForm) => {
-    const { username, password, code, uuid } = userInfoForm
+    const { username, password, code = '', uuid = '' } = userInfoForm
     const res = await apiLogin(username, password, code, uuid)
-    // 尝试保存 token 到多个可能的存储位置
-    if (res.token) {
-      setToken(res.token)
-      setWdsToken(res.token)
-      state.token = res.token
-    }
+    setToken(res.token)
+    state.token = res.token
     return res
   }
 
