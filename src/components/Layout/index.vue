@@ -1,18 +1,12 @@
 <template>
-  <div class="app-layout">
-    <header class="global-titlebar">
-      <div class="drag-region">WTS 协同工作平台</div>
-      <div class="window-controls">
-        <div class="control-btn" @click="handleMinimize"><i class="el-icon-minus"></i></div>
-        <div class="control-btn" @click="handleMaximize"><i class="el-icon-full-screen"></i></div>
-        <div class="control-btn close-btn" @click="handleClose"><i class="el-icon-close"></i></div>
-      </div>
+  <div class="trae-layout">
+    <header class="trae-titlebar">
     </header>
 
-    <div class="layout-body">
+    <div class="trae-body">
       <Sidebar />
       
-      <main class="main-content">
+      <main class="trae-main-content">
         <router-view v-slot="{ Component }">
           <keep-alive>
             <component :is="Component" v-if="$route.meta.keepAlive" />
@@ -27,30 +21,29 @@
 <script setup>
 import Sidebar from './Sidebar.vue';
 
-// 调用 Electron 预加载脚本暴露的窗口控制 API
+// Electron 窗口控制
 const handleMinimize = () => window.wts?.windowControl?.minimize();
 const handleMaximize = () => window.wts?.windowControl?.maximize();
 const handleClose = () => window.wts?.windowControl?.close();
 </script>
 
 <style scoped>
-.app-layout {
+.trae-layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
   width: 100vw;
-  background: #ffffff;
+  background: #FFFFFF;
   overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* 全局标题栏 */
-.global-titlebar {
-  height: 38px;
+/* 顶部系统栏 */
+.trae-titlebar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #ffffff;
-  border-bottom: 1px solid #f1f3f4;
+  background: #FAFAFA; /* 与侧边栏同色 */
   user-select: none;
   flex-shrink: 0;
 }
@@ -58,46 +51,48 @@ const handleClose = () => window.wts?.windowControl?.close();
 .drag-region {
   flex: 1;
   height: 100%;
-  display: flex;
-  align-items: center;
-  padding-left: 16px;
-  -webkit-app-region: drag; /* 开启 Electron 拖拽 */
-  font-size: 13px;
-  font-weight: 600;
-  color: #5f6368;
+  -webkit-app-region: drag;
 }
 
 .window-controls {
   display: flex;
   height: 100%;
-  -webkit-app-region: no-drag; /* 按钮区域不可拖拽，否则无法点击 */
+  -webkit-app-region: no-drag;
 }
 
-.control-btn {
+.win-btn {
   width: 46px;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #374151;
   cursor: pointer;
-  color: #5f6368;
   transition: background 0.2s;
 }
 
-.control-btn:hover { background: #f1f3f4; }
-.close-btn:hover { background: #e81123; color: white; }
+.win-btn svg {
+  width: 10px;
+  height: 10px;
+}
 
-/* 布局主体 */
-.layout-body {
+.win-btn:hover { background: #E5E7EB; }
+.close-btn:hover { background: #E81123; color: white; }
+
+.trae-body {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-.main-content {
+.trae-main-content {
   flex: 1;
   position: relative;
+  background: #FFFFFF;
+  border-top-left-radius: 8px; /* 产生类似 Mac 的内嵌卡片感 */
+  border-top: 1px solid #E5E7EB;
+  border-left: 1px solid #E5E7EB;
+  box-shadow: -4px 0 15px rgba(0,0,0,0.02);
   overflow: hidden;
-  background: #f8f9fa;
 }
 </style>

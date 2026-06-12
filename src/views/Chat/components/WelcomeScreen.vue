@@ -4,18 +4,11 @@
     <div class="welcome-header">
       <div class="avatar-container">
         <div class="avatar">
-          <i class="el-icon-s-tools"></i>
-        </div>
-        <div class="typing-indicator" v-if="showTyping">
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
+          <!-- <img :src="aiIconUrl" alt="WTS AI" /> -->
         </div>
       </div>
       <div class="welcome-title-wrapper">
-        <h1 class="welcome-title">
-          <span class="title-text" ref="titleRef">{{ displayedTitle }}</span>
-        </h1>
+        <h1 class="welcome-title">WTS 协同工作</h1>
         <p class="welcome-subtitle">帮你高效完成日常工作任务</p>
       </div>
     </div>
@@ -28,7 +21,7 @@
           v-for="agent in agentTypes" 
           :key="agent.type"
           class="suggest-card"
-          :class="[`${agent.type}-card`, { 'is-selected': currentAgentType === agent.type }]"
+          :class="{ 'is-selected': currentAgentType === agent.type }"
           @click="$emit('toggle-agent', agent.type)"
         >
           <div class="card-icon" :style="{ backgroundColor: agent.bgColor, color: agent.color }">
@@ -49,41 +42,11 @@
     <div class="quick-tools">
       <div class="tools-title">快捷工具</div>
       <div class="tools-scroll">
-        <div class="tool-card">
-          <div class="tool-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
-            <i class="el-icon-link"></i>
+        <div class="tool-card" v-for="tool in quickTools" :key="tool.name" @click="handleQuickTool(tool)">
+          <div class="tool-icon" :style="{ background: tool.bgColor, color: tool.color }">
+            <i :class="tool.icon"></i>
           </div>
-          <span class="tool-name">网页读取</span>
-        </div>
-        <div class="tool-card">
-          <div class="tool-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
-            <i class="el-icon-search"></i>
-          </div>
-          <span class="tool-name">调研分析</span>
-        </div>
-        <div class="tool-card">
-          <div class="tool-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
-            <i class="el-icon-file-excel"></i>
-          </div>
-          <span class="tool-name">表格分析</span>
-        </div>
-        <div class="tool-card">
-          <div class="tool-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
-            <i class="el-icon-file-text"></i>
-          </div>
-          <span class="tool-name">文档总结</span>
-        </div>
-        <div class="tool-card">
-          <div class="tool-icon" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;">
-            <i class="el-icon-presentation"></i>
-          </div>
-          <span class="tool-name">PPT生成</span>
-        </div>
-        <div class="tool-card">
-          <div class="tool-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
-            <i class="el-icon-code"></i>
-          </div>
-          <span class="tool-name">代码生成</span>
+          <span class="tool-name">{{ tool.name }}</span>
         </div>
       </div>
     </div>
@@ -121,55 +84,66 @@
         </div>
       </div>
     </div>
+
+    <!-- 历史会话提示 -->
+    <div class="history-hint">
+      <i class="el-icon-history"></i>
+      <span>查看历史会话，继续之前的对话</span>
+    </div>
   </div>
 </template>
 
-<script setup>import { ref, onMounted } from 'vue';
-const props = defineProps({
- agentTypes: {
- type: Array,
- required: true
- },
- currentAgentType: {
- type: String,
- default: 'default'
- }
+<script setup>
+import { ref } from 'vue';
+import aiIcon from '@/assets/image/ai-icon.png';
+
+const aiIconUrl = aiIcon;
+
+defineProps({
+  agentTypes: {
+    type: Array,
+    default: () => []
+  },
+  currentAgentType: {
+    type: String,
+    default: 'default'
+  }
 });
-defineEmits(['toggle-agent']);
-const fullTitle = 'WTS 协同工作';
-const displayedTitle = ref('');
-const showTyping = ref(true);
-const titleRef = ref(null);
-onMounted(() => {
- let index = 0;
- const typeInterval = setInterval(() => {
- if (index < fullTitle.length) {
- displayedTitle.value += fullTitle[index];
- index++;
- }
- else {
- clearInterval(typeInterval);
- setTimeout(() => {
- showTyping.value = false;
- }, 500);
- }
- }, 100);
-});
+
+const emit = defineEmits(['toggle-agent']);
+
+const quickTools = ref([
+  { name: '网页读取', icon: 'el-icon-link', bgColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' },
+  { name: '调研分析', icon: 'el-icon-search', bgColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981' },
+  { name: '表格分析', icon: 'el-icon-file-excel', bgColor: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' },
+  { name: '文档总结', icon: 'el-icon-file-text', bgColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' },
+  { name: 'PPT生成', icon: 'el-icon-presentation', bgColor: 'rgba(236, 72, 153, 0.1)', color: '#ec4899' },
+  { name: '代码生成', icon: 'el-icon-code', bgColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }
+]);
+
 const getAgentIcon = (icon) => {
- const iconMap = {
- device: 'el-icon-cpu',
- fault: 'el-icon-stethoscope',
- business: 'el-icon-briefcase'
- };
- return iconMap[icon] || 'el-icon-help';
+  const iconMap = {
+    device: 'el-icon-cpu',
+    fault: 'el-icon-stethoscope',
+    business: 'el-icon-briefcase',
+    default: 'el-icon-s-tools'
+  };
+  return iconMap[icon] || 'el-icon-help';
 };
+
 const getAgentDesc = (type) => {
- const descMap = {
- device: '设备技术咨询、故障排查、性能分析',
- fault: '智能诊断、异常分析、解决方案推荐',
- business: '业务流程咨询、文档撰写、数据分析'
- };
- return descMap[type] || '专业智能助手';
+  const descMap = {
+    device: '设备技术咨询、故障排查、性能分析',
+    fault: '智能诊断、异常分析、解决方案推荐',
+    business: '业务流程咨询、文档撰写、数据分析',
+    default: '综合智能助手，满足多种需求'
+  };
+  return descMap[type] || '专业智能助手';
+};
+
+const handleQuickTool = (tool) => {
+  // 快捷工具点击处理
+  console.log('Quick tool clicked:', tool.name);
 };
 </script>
 
@@ -180,6 +154,7 @@ const getAgentDesc = (type) => {
   flex-direction: column;
   padding: 60px 80px;
   overflow-y: auto;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
 }
 
 /* 标题区域 */
@@ -198,43 +173,14 @@ const getAgentDesc = (type) => {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: #fff;
+  overflow: hidden;
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
 }
 
-.typing-indicator {
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4px;
-  background: #fff;
-  padding: 4px 10px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.typing-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #9aa0a6;
-  animation: typingBounce 1.4s infinite ease-in-out;
-}
-
-.typing-dot:nth-child(1) { animation-delay: 0s; }
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes typingBounce {
-  0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
-  40% { transform: scale(1); opacity: 1; }
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .welcome-title-wrapper {
@@ -473,5 +419,45 @@ const getAgentDesc = (type) => {
   color: #9aa0a6;
   margin: 0;
   line-height: 1.5;
+}
+
+/* 历史会话提示 */
+.history-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 12px;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.history-hint i {
+  font-size: 14px;
+}
+
+/* 响应式 */
+@media (max-width: 1024px) {
+  .suggest-card-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tips-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .welcome-screen {
+    padding: 40px 24px;
+  }
+  .suggest-card-list {
+    grid-template-columns: 1fr;
+  }
+  .tips-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
